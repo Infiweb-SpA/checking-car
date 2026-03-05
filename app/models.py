@@ -33,7 +33,7 @@ class Trabajo(db.Model):
     nombre_cliente = db.Column(db.String(100), nullable=False)
     tipo_vehiculo = db.Column(db.String(50), nullable=False)
     marca_vehiculo = db.Column(db.String(50), nullable=False)
-    imagen_evidencia = db.Column(db.String(255), nullable=True) # Puede estar vacío si no sube foto
+    imagen_evidencia = db.Column(db.Text, nullable=True) # Ahora es Text para aguantar muchas fotos
     # 👆 FIN NUEVOS CAMPOS 👆
     
     telefono_cliente = db.Column(db.String(20), nullable=False)
