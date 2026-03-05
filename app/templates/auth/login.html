@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Iniciar Sesión - Taller</h2>
+
+<!-- MUESTRA ERRORES SI LA CLAVE ESTÁ MAL -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
+        <span class="block sm:inline">{{ message }}</span>
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+<!-- FIN DE ERRORES -->
+
+<form method="POST" action="">
+    <!-- ... (El resto de tu formulario queda exactamente igual) ... -->
+    <div class="mb-4">
+        <label class="block text-gray-700 text-sm font-bold mb-2">Correo Electrónico</label>
+        <input type="email" name="email" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+    </div>
+    <div class="mb-6">
+        <label class="block text-gray-700 text-sm font-bold mb-2">Contraseña</label>
+        <input type="password" name="password" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+    </div>
+    <div class="flex items-center justify-between">
+        <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full" type="submit">
+            Entrar al Sistema
+        </button>
+    </div>
+</form>
+{% endblock %}

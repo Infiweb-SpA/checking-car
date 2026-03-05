@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Cabecera de bienvenida más moderna -->
+<div class="mb-6">
+    <h1 class="text-3xl font-extrabold text-slate-800 tracking-tight">Panel de Control</h1>
+    <p class="text-slate-500 text-sm mt-1">Hola, {{ current_user.nombre_taller }} 👋</p>
+</div>
+
+<!-- Botón Principal "Call to Action" (Flotante y llamativo) -->
+<div class="mb-6">
+    <a href="{{ url_for('taller.nuevo_trabajo') }}" class="flex items-center justify-center w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 px-4 rounded-2xl shadow-lg transition-transform active:scale-95">
+        <span class="text-xl mr-2">⊕</span> Ingresar Nuevo Vehículo
+    </a>
+</div>
+
+<!-- BARRA DE BÚSQUEDA Y FILTROS -->
+<div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 mb-6">
+    
+    <!-- Buscador -->
+    <form method="GET" action="{{ url_for('taller.dashboard') }}" class="flex gap-2 mb-3">
+        <!-- Mantenemos el filtro de estado si ya estaba seleccionado -->
+        {% if filtro_estado %}
+            <input type="hidden" name="estado" value="{{ filtro_estado }}">
+        {% endif %}
+        
+        <div class="relative w-full">
+            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">🔍</div>
+            <input type="text" name="q" value="{{ busqueda or '' }}" placeholder="Buscar patente..." 
+                   class="bg-white border border-slate-300 text-slate-900 text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-3 shadow-sm uppercase uppercase">
+        </div>
+        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-xl shadow-sm">
+            Buscar
+        </button>
+        {% if busqueda %}
+            <a href="{{ url_for('taller.dashboard', estado=filtro_estado) }}" class="flex items-center justify-center bg-slate-200 text-slate-600 px-3 rounded-xl hover:bg-slate-300">✖</a>
+        {% endif %}
+    </form>
+
+    <!-- Píldoras de Filtro Rápido (Chips) -->
+    <div class="flex gap-2 overflow-x-auto pb-1 hide-scrollbar text-sm">
+        <a href="{{ url_for('taller.dashboard', q=busqueda) }}" 
+           class="px-4 py-2 rounded-full font-semibold transition-colors whitespace-nowrap border {% if not filtro_estado %}bg-slate-800 text-white border-slate-800{% else %}bg-white text-slate-600 border-slate-300 hover:bg-slate-100{% endif %}">
+           📋 Todos
+        </a>
+        <a href="{{ url_for('taller.dashboard', estado='Pendiente', q=busqueda) }}" 
+           class="px-4 py-2 rounded-full font-semibold transition-colors whitespace-nowrap border {% if filtro_estado == 'Pendiente' %}bg-amber-100 text-amber-800 border-amber-300{% else %}bg-white text-slate-600 border-slate-300 hover:bg-slate-100{% endif %}">
+           ⚠️ Con Deuda
+        </a>
+        <a href="{{ url_for('taller.dashboard', estado='Pagado', q=busqueda) }}" 
+           class="px-4 py-2 rounded-full font-semibold transition-colors whitespace-nowrap border {% if filtro_estado == 'Pagado' %}bg-emerald-100 text-emerald-800 border-emerald-300{% else %}bg-white text-slate-600 border-slate-300 hover:bg-slate-100{% endif %}">
+           ✅ Pagados
+        </a>
+    </div>
+</div>
+
+<!-- LISTA DE TRABAJOS (Tarjetas Modernas) -->
+<div class="space-y-5">
+    {% for trabajo in trabajos %}
+    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 relative overflow-hidden">
+        
+        <!-- Línea de color lateral según estado -->
+        <div class="absolute left-0 top-0 bottom-0 w-2 {% if trabajo.estado == 'Pendiente' %}bg-amber-400{% else %}bg-emerald-400{% endif %}"></div>
+
+        <!-- Etiqueta de Estado -->
+        <div class="flex justify-between items-start mb-2 pl-3">
+            <div>
+                <h3 class="text-2xl font-black text-slate-800 tracking-tight uppercase">{{ trabajo.patente }}</h3>
+                <p class="text-slate-500 text-xs font-medium">{{ trabajo.marca_vehiculo }} • {{ trabajo.fecha.strftime('%d %b %Y') }}</p>
+            </div>
+            {% if trabajo.estado == 'Pendiente' %}
+                <span class="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1.5 rounded-full border border-amber-200">DEUDA</span>
+            {% else %}
+                <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1.5 rounded-full border border-emerald-200">PAGADO</span>
+            {% endif %}
+        </div>
+
+        <div class="pl-3 mb-4 mt-3">
+            <p class="text-slate-900 font-bold text-xl">${{ "{:,.0f}".format(trabajo.total_costo).replace(',', '.') }}</p>
+            <p class="text-slate-500 text-sm line-clamp-1">{{ trabajo.descripcion }}</p>
+        </div>
+        
+        <div class="pl-3 flex flex-col space-y-2.5 mt-2">
+            <!-- Botón 1: Enviar Presupuesto -->
+            {% set msj_presupuesto = "Hola " ~ trabajo.nombre_cliente ~ ", aquí está el detalle del servicio para la patente " ~ trabajo.patente ~ ": " ~ base_url ~ url_for('cliente.ver_presupuesto', uuid_publico=trabajo.uuid_publico) %}
+            <a href="https://wa.me/{{ trabajo.telefono_cliente }}?text={{ msj_presupuesto | urlencode }}" target="_blank" 
+               class="flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 px-4 rounded-xl border border-slate-300 transition-colors">
+                <span class="mr-2">📄</span> Enviar Resumen
+            </a>
+
+            <!-- Botones si DEBE PLATA -->
+            {% if trabajo.estado == 'Pendiente' %}
+                
+                {% set msj_cobro = "Hola " ~ trabajo.nombre_cliente ~ ", le escribo de " ~ current_user.nombre_taller ~ ". Le recuerdo amablemente el saldo pendiente de $" ~ trabajo.total_costo ~ " por el vehículo " ~ trabajo.patente ~ ". Quedo atento, ¡saludos!" %}
+                <a href="https://wa.me/{{ trabajo.telefono_cliente }}?text={{ msj_cobro | urlencode }}" target="_blank" 
+                   class="flex items-center justify-center bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-4 rounded-xl shadow-sm transition-colors">
+                    <span class="mr-2">💬</span> Cobrar por WhatsApp
+                </a>
+
+                <form action="{{ url_for('taller.marcar_pagado', id=trabajo.id) }}" method="POST">
+                    <button type="submit" class="w-full flex items-center justify-center bg-white hover:bg-emerald-50 text-emerald-600 font-bold py-3 px-4 rounded-xl border-2 border-emerald-500 transition-colors">
+                        ✅ Marcar como Pagado
+                    </button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+    {% else %}
+        <div class="text-center py-10 bg-slate-50 rounded-2xl border border-dashed border-slate-300">
+            <span class="text-4xl block mb-2">🚘</span>
+            <p class="text-slate-600 font-medium">No se encontraron vehículos.</p>
+            <p class="text-slate-400 text-sm mt-1">Intenta con otro filtro o ingresa uno nuevo.</p>
+        </div>
+    {% endfor %}
+</div>
+
+<!-- Estilo extra para esconder la barra de scroll en los filtros horizontales -->
+<style>
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+</style>
+{% endblock %}
