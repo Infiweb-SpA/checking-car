@@ -11,25 +11,25 @@ with app.app_context():
     if not Taller.query.filter_by(email="maestro@taller.cl").first():
         
         # Crear un Mecánico Falso
-        nuevo_taller = Taller(nombre_taller="Taller Los Pinos Araucanía", email="maestro@taller.cl")
-        nuevo_taller.set_password("123456") # Contraseña fácil para probar
+        nuevo_taller = Taller(nombre_taller="Mecanico Ariel Mora ", email="maestro@taller.cl")
+        nuevo_taller.set_password("1234") # Contraseña fácil para probar
         db.session.add(nuevo_taller)
         db.session.commit()
 
         # Crear un Trabajo Falso asociado a ese mecánico (CON LOS DATOS NUEVOS)
-        nuevo_trabajo = Trabajo(
-            patente="AB-CD-12",
-            nombre_cliente="Juan Pérez",         # <-- NUEVO CAMPO
-            tipo_vehiculo="Camioneta",           # <-- NUEVO CAMPO
-            marca_vehiculo="Toyota Hilux",       # <-- NUEVO CAMPO
-            telefono_cliente="56920368688", 
-            descripcion="Cambio de pastillas de freno y afinamiento completo.",
-            total_costo=85000,
-            estado="Pendiente",                  # Estado inicial de la deuda
-            monto_pagado=0,                      # Aún no paga nada
-            taller_id=nuevo_taller.id
-        )
-        db.session.add(nuevo_trabajo)
+        #nuevo_trabajo = Trabajo(
+        #    patente="AB-CD-12",
+        #    nombre_cliente="Juan Pérez",         # <-- NUEVO CAMPO
+        #    tipo_vehiculo="Camioneta",           # <-- NUEVO CAMPO
+        #    marca_vehiculo="Toyota Hilux",       # <-- NUEVO CAMPO
+        #    telefono_cliente="56920368688", 
+        #    descripcion="Cambio de pastillas de freno y afinamiento completo.",
+        #    total_costo=85000,
+        #    estado="Pendiente",                  # Estado inicial de la deuda
+        #    monto_pagado=0,                      # Aún no paga nada
+        #    taller_id=nuevo_taller.id
+        #)
+        #db.session.add(nuevo_trabajo)
         db.session.commit()
 
         print("✅ ¡Datos creados exitosamente! Ya puedes iniciar sesión.")
