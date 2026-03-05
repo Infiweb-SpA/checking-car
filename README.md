@@ -34,6 +34,9 @@ El sistema opera bajo un modelo híbrido B2B2C (Business to Business to Consumer
 ### A. Modelo de Base de Datos (Entity-Relationship)
 *Relación Uno-a-Muchos entre el Taller y sus Trabajos.*
 
+
+```
+
 ```mermaid
 erDiagram
     TALLER ||--o{ TRABAJO : "registra"
